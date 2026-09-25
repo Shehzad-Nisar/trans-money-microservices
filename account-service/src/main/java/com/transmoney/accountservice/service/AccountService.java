@@ -2,12 +2,15 @@ package com.transmoney.accountservice.service;
 
 import com.transmoney.accountservice.Entity.Account;
 import com.transmoney.accountservice.Entity.AccountStatus;
+import com.transmoney.accountservice.Entity.AccountType;
 import com.transmoney.accountservice.dto.AccountResponse;
 import com.transmoney.accountservice.dto.CreateAccountRequest;
 import com.transmoney.accountservice.repository.AccountRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
 
 @Service
 @Slf4j
@@ -29,6 +32,12 @@ public class AccountService {
         account.setAccountType(request.getAccountType());
         account.setAccountStatus(AccountStatus.ACTIVE);
         account.setBalance(request.getInitialDeposit());
+        account.setAccountNumber(generateAccountNumber());
+        account.setDailyTransactionLimit(
+                request.getAccountType() == AccountType.SAVING
+                ? new BigDecimal("100000")
+                : new BigDecimal("500000")
+        );
 
 
     }
