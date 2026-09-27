@@ -11,18 +11,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.security.SecureRandom;
 
 @Service
 @Slf4j
 @AllArgsConstructor
 
 public class AccountService {
-    AccountRepository accountRepository;
+    private final AccountRepository accountRepository;
+    private final SecureRandom secureRandom = new SecureRandom();
     public AccountResponse createAccount(CreateAccountRequest request) {
-        log.info("Creating an account for : {} " + request.getEmail());
+        log.info("Creating an account for : {}" , request.getEmail());
 
         if(accountRepository.existsByEmail(request.getEmail())){
-            throw new RuntimeException("Account already exited against this email: " + request.getEmail());
+            throw new RuntimeException("Account already exists against this email: " + request.getEmail());
         }
 
         Account account = new Account();
@@ -50,8 +52,15 @@ public class AccountService {
 
     }
 
+    // generate unique 12 digits account number :
     private String generateAccountNumber() {
+        String accountNumber ;
+        do {
+            long number = secureRandom.nextLong(1000000000000L);
+            accountNumber = String.format("%012d", number);
+        } while(accountRepository.existsByAccountNumber(accountNumber));
 
+        return accountNumber;
     }
 
     private AccountResponse mapToResponse(Account savedAccount) {
@@ -68,6 +77,10 @@ public class AccountService {
         accountResponse.setCreatedAt(savedAccount.getCreatedAt());
 
         return accountResponse;
+
+    }
+
+    public AccountResponse getAccount(String accountNumber) {
 
     }
 }

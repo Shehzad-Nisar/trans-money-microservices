@@ -9,5 +9,6 @@ public interface AccountRepository extends JpaRepository<Account,String> {
 
     boolean existsByEmail(@NotBlank(message = "Account holder's email is required.") @Email(message = "Invalid email format.") String email);
 
+    boolean existsByAccountNumber(String accountNumber);
 }
 
