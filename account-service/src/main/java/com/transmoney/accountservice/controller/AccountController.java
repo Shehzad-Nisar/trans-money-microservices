@@ -35,7 +35,7 @@ public class AccountController {
             @PathVariable String accountNumber){
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(accountService.getAccount(accountNumber);
+                .body(accountService.getAccount(accountNumber));
     }
 
     @GetMapping("/{accountNumber}/balance")
@@ -43,7 +43,7 @@ public class AccountController {
             @PathVariable String accountNumber){
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(accountService.getBalance(accountNumber);
+                .body(accountService.getBalance(accountNumber));
     }
 
     @PutMapping("/{accountNumber}/block")

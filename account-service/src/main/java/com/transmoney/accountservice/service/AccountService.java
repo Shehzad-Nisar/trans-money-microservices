@@ -20,6 +20,12 @@ import java.security.SecureRandom;
 public class AccountService {
     private final AccountRepository accountRepository;
     private final SecureRandom secureRandom = new SecureRandom();
+
+
+    /*
+    * Create a new Account.
+    *
+    * */
     public AccountResponse createAccount(CreateAccountRequest request) {
         log.info("Creating an account for : {}" , request.getEmail());
 
@@ -46,10 +52,6 @@ public class AccountService {
         log.info("Account created : " + savedAccount.getAccountNumber());
 
         return mapToResponse(savedAccount);
-
-
-
-
     }
 
     // generate unique 12 digits account number :
@@ -80,7 +82,39 @@ public class AccountService {
 
     }
 
+    /*
+    * get Account , called by using account number .
+    * */
     public AccountResponse getAccount(String accountNumber) {
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(()-> new RuntimeException("Account Not found!."));
+
+        return mapToResponse(account);
+    }
+
+    /*
+    * Get account balance , called from controller using accNumber:
+    * */
+    public BigDecimal getBalance(String accountNumber) {
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(()-> new RuntimeException("Account NOt Found."));
+        return account.getBalance();
+    }
+
+
+/*
+* Block Account - Called by Fraud detection Service via Kafka
+* */
+    public void blockAccount(String accountNumber) {
+
+        log.info("Blocking the Account : {}", accountNumber);
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(()-> new RuntimeException("Account NOt Found."));
+        account.setAccountStatus(AccountStatus.BLOCKED);
+
+        accountRepository.save(account);
+        log.info("Account Blocked Successfully : {}", accountNumber);
+
 
     }
 }
