@@ -39,6 +39,35 @@ public class AccountService {
                 : new BigDecimal("500000")
         );
 
+        Account savedAccount = accountRepository.save(account);
+
+        log.info("Account created : " + savedAccount.getAccountNumber());
+
+        return mapToResponse(savedAccount);
+
+
+
+
+    }
+
+    private String generateAccountNumber() {
+
+    }
+
+    private AccountResponse mapToResponse(Account savedAccount) {
+        AccountResponse accountResponse = new AccountResponse();
+        accountResponse.setId(savedAccount.getId());
+        accountResponse.setAccountNumber(savedAccount.getAccountNumber());
+        accountResponse.setAccountHolderName(savedAccount.getAccountHolderName());
+        accountResponse.setEmail(savedAccount.getEmail());
+        accountResponse.setPhone(savedAccount.getPhone());
+        accountResponse.setAccountType(savedAccount.getAccountType());
+        accountResponse.setAccountStatus(savedAccount.getAccountStatus());
+        accountResponse.setBalance(savedAccount.getBalance());
+        accountResponse.setDailyTransactionLimit(savedAccount.getDailyTransactionLimit());
+        accountResponse.setCreatedAt(savedAccount.getCreatedAt());
+
+        return accountResponse;
 
     }
 }

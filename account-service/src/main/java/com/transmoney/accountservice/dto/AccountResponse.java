@@ -2,9 +2,12 @@ package com.transmoney.accountservice.dto;
 
 import com.transmoney.accountservice.Entity.AccountStatus;
 import com.transmoney.accountservice.Entity.AccountType;
+import lombok.Data;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Data
 public class AccountResponse {
 
     private String id;
