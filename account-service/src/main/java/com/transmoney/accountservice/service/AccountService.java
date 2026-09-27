@@ -57,7 +57,7 @@ public class AccountService {
     private String generateAccountNumber() {
         String accountNumber ;
         do {
-            long number = SECURE_RANDOM.nextLong(1000000000000L);
+            long number = 1L + SECURE_RANDOM.nextLong(999999999999L);
             accountNumber = String.format("%012d", number);
         } while(accountRepository.existsByAccountNumber(accountNumber));
 
