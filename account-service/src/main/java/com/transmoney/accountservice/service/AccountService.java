@@ -19,8 +19,7 @@ import java.security.SecureRandom;
 
 public class AccountService {
     private final AccountRepository accountRepository;
-    private final SecureRandom secureRandom = new SecureRandom();
-
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     /*
     * Create a new Account.
@@ -58,7 +57,7 @@ public class AccountService {
     private String generateAccountNumber() {
         String accountNumber ;
         do {
-            long number = secureRandom.nextLong(1000000000000L);
+            long number = SECURE_RANDOM.nextLong(1000000000000L);
             accountNumber = String.format("%012d", number);
         } while(accountRepository.existsByAccountNumber(accountNumber));
 
@@ -124,6 +123,11 @@ public class AccountService {
     * */
     public void deductBalance(String accountNumber, BigDecimal amount) {
         log.info("Deduction amount of {} from Account : {}", amount, accountNumber);
+
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Amount must be greater than zero");
+        }
+
         Account account = accountRepository.findByAccountNumber(accountNumber)
                 .orElseThrow(()-> new RuntimeException("Account not found"));
 
@@ -157,6 +161,9 @@ public class AccountService {
         Account account = accountRepository.findByAccountNumber(accountNumber)
                 .orElseThrow(()-> new RuntimeException("Account not found"));
 
+        if (account.getAccountStatus() != AccountStatus.ACTIVE) {
+            throw new RuntimeException("Account is not Active : " + accountNumber);
+        }
 
         account.setBalance(account.getBalance().add(amount));
 
