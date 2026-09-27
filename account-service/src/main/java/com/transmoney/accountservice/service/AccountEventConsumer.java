@@ -3,6 +3,7 @@ package com.transmoney.accountservice.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,7 @@ public class AccountEventConsumer {
     * - Credit receiver's Account.
     * @param payload.
     * */
+    @KafkaListener(topics = "transaction.completed")
     public void consumeTransactionCompleted(
             @Payload Map<String,Object> payload){
         try {
@@ -35,5 +37,26 @@ public class AccountEventConsumer {
 
         }
 
+    }
+
+    /*
+    * -Consume fraud detection event from Kafka .
+    * - Blocked that flagged account.
+    * - @param payload
+    *
+    * */
+
+    @KafkaListener(topics = "fraud.detected")
+    public void consumeFraudDetected(
+            @Payload Map<String, Object> payload){
+    try {
+        String receiverAccount = (String) payload.get("receiverAccountNumber");
+        log.info("Fraud detected now blocking account : {}",receiverAccount);
+
+        accountService.blockAccount(receiverAccount);
+    }catch (Exception e){
+        log.error("Error blocking account : {}", e.getMessage());
+
+    }
     }
 }
