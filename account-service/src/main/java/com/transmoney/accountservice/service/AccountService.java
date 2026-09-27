@@ -117,4 +117,28 @@ public class AccountService {
 
 
     }
+
+    /*
+    * -Deduct balance form sender Account.
+    * - Called by Transaction
+    * */
+    public void deductBalance(String accountNumber, BigDecimal amount) {
+        log.info("Deduction amount of {} from Account : {}", amount, accountNumber);
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(()-> new RuntimeException("Account not found"));
+
+        if(account.getAccountStatus()!= AccountStatus.ACTIVE){
+            throw new RuntimeException("Account is not Active : " + accountNumber);
+        }
+
+        if(account.getBalance().compareTo(amount)<0){
+            throw new RuntimeException("Insufficient balance for this transaction : " + accountNumber);
+        }
+
+        account.setBalance(account.getBalance().subtract(amount));
+
+        accountRepository.save(account);
+
+        log.info("Successfully deducted balance from sender account as : {}",accountNumber);
+    }
 }
