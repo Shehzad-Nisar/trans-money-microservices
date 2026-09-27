@@ -50,7 +50,8 @@ public class AccountController {
     public ResponseEntity<String> blockAccount(
             @PathVariable String accountNumber){
         accountService.blockAccount(accountNumber);
-        ResponseEntity.ok("ACCOUNT BLOCKED SUCCESSFULLY.");
+        return ResponseEntity.ok("ACCOUNT BLOCKED SUCCESSFULLY.");
+
     }
 
     /*
@@ -80,7 +81,7 @@ public class AccountController {
             @RequestParam BigDecimal amount){
 
         accountService.creditBalance(accountNumber, amount);
-        return ResponseEntity.ok("BALANCE CREDITED SUCCESSFULLY.")
+        return ResponseEntity.ok("BALANCE CREDITED SUCCESSFULLY.");
     }
 
 

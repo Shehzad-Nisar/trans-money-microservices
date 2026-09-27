@@ -141,4 +141,29 @@ public class AccountService {
 
         log.info("Successfully deducted balance from sender account as : {}",accountNumber);
     }
+
+
+    /*
+    * 1- Credit balance.
+    * 2- Called by transaction service via kafka.
+    * */
+    public void creditBalance(String accountNumber, BigDecimal amount) {
+        log.info("Crediting balance of {} in Account : {}", amount, accountNumber);
+
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Amount must be greater than zero");
+        }
+
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(()-> new RuntimeException("Account not found"));
+
+
+        account.setBalance(account.getBalance().add(amount));
+
+        accountRepository.save(account);
+
+        log.info("Successfully credited balance in receiver account as : {}",accountNumber);
+
+    }
+
 }
