@@ -1,12 +1,16 @@
 package com.transmoney.transactionservice.entity;
 
 
+import ch.qos.logback.classic.pattern.LineOfCallerConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "transactions")
@@ -18,13 +22,39 @@ public class Transaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    String id ;
+    private String id ;
 
-    String senderAccountNumber;
+    @Column(nullable = false)
+    private String senderAccountNumber;
 
-    String receiverAccountNumber;
+    @Column(nullable = false)
+    private String receiverAccountNumber;
 
-    BigDecimal amount;
+    @Column(nullable = false,precision = 15, scale = 2)
+    private BigDecimal amount;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TransactionType type ;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TransactionStatus status;
+
+    @Column(nullable = false)
+    private String description;
+
+    private String failureReason;
+
+    private String referenceNumber;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    private LocalDateTime completedAt;
+
+
+
 
 
 }
