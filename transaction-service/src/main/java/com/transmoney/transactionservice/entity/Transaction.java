@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.resource.transaction.spi.TransactionStatus;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -52,8 +52,6 @@ public class Transaction {
     private LocalDateTime createdAt;
 
     private LocalDateTime completedAt;
-
-
 
 
 
