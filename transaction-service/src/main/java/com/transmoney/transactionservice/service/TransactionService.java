@@ -62,6 +62,7 @@ public class TransactionService {
         log.info("Transaction saved as PROCESSING: {} ",transaction.getId());
 
 
+        //SAGA STEP 2 -Publish for fraud check
         TransactionInitiatedEvent event = new TransactionInitiatedEvent(
                 savedTransaction.getId(),
                 savedTransaction.getSenderAccountNumber(),
@@ -70,8 +71,31 @@ public class TransactionService {
                 savedTransaction.getDescription());
 
         kafkaTemplate.send(TRANSACTION_INITIATED_TOPIC,event.getTransactionId(),event);
+        log.info("SAGA STEP 2 -> transactionInitiatedEven published : {} ",savedTransaction.getId());
+
+
+        return mapToResponse(savedTransaction);
+
+
     }
 
+    private TransactionResponse mapToResponse(Transaction savedTransaction) {
+        TransactionResponse response = new TransactionResponse();
+        response.setId(savedTransaction.getId());
+        response.setSenderAccountNumber(savedTransaction.getSenderAccountNumber());
+        response.setReceiverAccountNumber(savedTransaction.getReceiverAccountNumber());
+        response.setAmount(savedTransaction.getAmount());
+        response.setType(savedTransaction.getType());
+        response.setStatus(savedTransaction.getStatus());
+        response.setDescription(savedTransaction.getDescription());
+        response.setFailureReason(savedTransaction.getFailureReason());
+        response.setReferenceNumber(savedTransaction.getReferenceNumber());
+        response.setCreatedAt(savedTransaction.getCreatedAt());
+        response.setCompletedAt(savedTransaction.getCompletedAt());
+
+        return response;
+
+    }
 
 
 }
