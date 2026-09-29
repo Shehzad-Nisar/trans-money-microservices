@@ -31,6 +31,8 @@ public class FraudDetectionConsumerEvent {
 
         try {
 
+            fraudDetectionService.check(payload);
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
