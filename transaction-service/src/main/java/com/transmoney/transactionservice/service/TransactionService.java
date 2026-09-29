@@ -12,9 +12,8 @@ import com.transmoney.transactionservice.repository.TransactionRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-
-import java.util.Random;
 import java.util.UUID;
 
 @Data
@@ -24,6 +23,7 @@ import java.util.UUID;
 public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final AccountServiceClient accountServiceClient;
+    private final KafkaTemplate<String,Object> kafkaTemplate;
 
     private final String TRANSACTION_INITIATED_TOPIC = "transaction.initiated";
     private final String TRANSACTION_COMPLETED_TOPIC = "transaction.completed";
@@ -68,6 +68,8 @@ public class TransactionService {
                 savedTransaction.getReceiverAccountNumber(),
                 savedTransaction.getAmount(),
                 savedTransaction.getDescription());
+
+        kafkaTemplate.send(TRANSACTION_INITIATED_TOPIC,event.getTransactionId(),event);
     }
 
 
