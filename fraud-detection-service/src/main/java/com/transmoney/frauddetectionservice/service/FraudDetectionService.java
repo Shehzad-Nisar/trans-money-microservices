@@ -1,12 +1,15 @@
 package com.transmoney.frauddetectionservice.service;
 
 
-import com.transmoney.frauddetectionservice.service.client.AccountServiceClient;
+import com.transmoney.frauddetectionservice.client.AccountServiceClient;
+import com.transmoney.frauddetectionservice.model.FraudCheckResult;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -14,6 +17,14 @@ import java.util.Map;
 @AllArgsConstructor
 public class FraudDetectionService {
     private final AccountServiceClient accountServiceClient;
+    private final KafkaTemplate<String,Object> kafkaTemplate;
+    private static final String VERIFICATION_REQUIRED_TOPIC = "verification.required";
+    private static final String FRAUD_CHECK_CLEAN_RESULT_TOPIC = "fraud.check.clean";
+
+
+
+
+
     public void check(Map<String, Object> payload) {
         String transactionId = (String) payload.get("transactionId");
         String senderAccountNumber = (String) payload.get("senderAccountNumber");
@@ -22,6 +33,33 @@ public class FraudDetectionService {
 
         //Fetching real balance data from account-service.
         BigDecimal senderBalance = accountServiceClient.getBalance(senderAccountNumber);
+
+        log.info("Checking transaction: {} account : {} amount : {} senderBalance : {} ",transactionId,senderAccountNumber,amount,senderBalance);
+
+        FraudCheckResult fraudCheckResult =  performFraudCheck(senderAccountNumber,amount,senderBalance);
+        if(fraudCheckResult.isFraud()){
+            log.info("Suspicious activity detected in account : {}" + "Reason : {} requesting OTP verification.",senderAccountNumber,fraudCheckResult.getReason());
+
+            Map<String,Object> verificationEvent = new HashMap<>();
+            verificationEvent.putIfAbsent("transactionId",transactionId);
+            verificationEvent.put("accountNumber",senderAccountNumber);
+            verificationEvent.put("amount",amount);
+            verificationEvent.put("reason",fraudCheckResult.getReason());
+
+            //sending event to kafka template so other service can consume it :
+            kafkaTemplate.send(VERIFICATION_REQUIRED_TOPIC,transactionId,verificationEvent);
+
+        }else {
+            log.info("Transaction is clean.");
+            Map<String ,Object> transactionCleanEvent = new HashMap<>();
+            transactionCleanEvent.put("transactionId",transactionId);
+            transactionCleanEvent.put("isFraud",false);
+            transactionCleanEvent.put("reason",null);
+
+            kafkaTemplate.send(FRAUD_CHECK_CLEAN_RESULT_TOPIC,transactionId,transactionCleanEvent);
+
+        }
+
 
     }
 }

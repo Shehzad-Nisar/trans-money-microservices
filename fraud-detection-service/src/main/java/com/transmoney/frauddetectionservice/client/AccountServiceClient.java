@@ -1,4 +1,4 @@
-package com.transmoney.frauddetectionservice.service.client;
+package com.transmoney.frauddetectionservice.client;
 
 
 import org.springframework.cloud.openfeign.FeignClient;
