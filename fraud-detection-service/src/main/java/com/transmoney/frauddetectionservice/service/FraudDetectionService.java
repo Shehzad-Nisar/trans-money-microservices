@@ -27,6 +27,9 @@ public class FraudDetectionService {
     @Value("${fraud.max-transaction-per-minute}")
     private final int maxTransactionsPerMinute;
 
+    @Value("${fraud.suspicious-amount-multiplier}")
+    private final int suspiciousAmountMultiplier;
+
 
     private static final String VERIFICATION_REQUIRED_TOPIC = "verification.required";
     private static final String FRAUD_CHECK_CLEAN_RESULT_TOPIC = "fraud.check.clean";
@@ -94,6 +97,8 @@ public class FraudDetectionService {
 
     }
 
+    // IMPLEMENTING PATTERNS LOGICS ONE BY ONE.
+    // 1 : isVelocityExceeded().
     private boolean isVelocityExceeded(String senderAccountNumber) {
         String key = "fraud-velocity"+senderAccountNumber;
         Long count = redisTemplate.opsForValue().increment(key);
@@ -104,5 +109,21 @@ public class FraudDetectionService {
         }
 
         return count != null && count>maxTransactionsPerMinute;
+    }
+
+    // 2 : isAmountSuspicious().
+    private boolean isAmountSuspicious(String senderAccountNumber, BigDecimal amount) {
+        String avg_key = "fraud:avg_amount"+senderAccountNumber;
+        String avg_Str_amount = redisTemplate.opsForValue().get(avg_key);
+
+        if(avg_Str_amount == null){
+            redisTemplate.opsForValue().set(avg_key,amount.toString());
+            avg_Str_amount = amount.toString();
+        }
+
+        BigDecimal avgAmount = new BigDecimal(avg_Str_amount);
+        BigDecimal threshold = avgAmount.multiply(BigDecimal.valueOf(suspiciousAmountMultiplier));
+
+
     }
 }
