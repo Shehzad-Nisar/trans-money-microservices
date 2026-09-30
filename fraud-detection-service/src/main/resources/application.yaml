@@ -1,3 +1,5 @@
 spring:
   application:
     name: fraud-detection-service
+fraud:
+  max-transaction-per-minute: 5
