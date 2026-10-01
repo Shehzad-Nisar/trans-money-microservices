@@ -15,7 +15,7 @@ import java.math.RoundingMode;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
+
 
 @Service
 @Slf4j
@@ -29,7 +29,10 @@ public class FraudDetectionService {
     private final int maxTransactionsPerMinute;
 
     @Value("${fraud.suspicious-amount-multiplier}")
-    private final int suspiciousAmountMultiplier;
+    private final double suspiciousAmountMultiplier;
+
+    @Value("${fraud.max-balance-percentage}")
+    private final double maxBalancePercentage;
 
 
     private static final String VERIFICATION_REQUIRED_TOPIC = "verification.required";
@@ -96,9 +99,12 @@ public class FraudDetectionService {
 
         }
 
+        return new FraudCheckResult(false,"No reason.");
+
     }
 
-    // IMPLEMENTING PATTERNS LOGICS ONE BY ONE.
+
+    // IMPLEMENTING THREE PATTERNS LOGICS ONE BY ONE.
     // 1 : isVelocityExceeded().
     private boolean isVelocityExceeded(String senderAccountNumber) {
         String key = "fraud-velocity"+senderAccountNumber;
@@ -146,7 +152,21 @@ public class FraudDetectionService {
 
         //returning the result in boolean if suspicious it will return 'TRUE' else 'FALSE'.:
         return amount.compareTo(threshold)>0;
+    }
 
+    //3. isBalanceCheckFailed(BigDecimal senderBalance, BigDecimal amount)
+
+    private boolean isBalanceCheckFailed(BigDecimal senderBalance, BigDecimal amount) {
+
+        BigDecimal maxAllowedBalance = senderBalance.multiply(
+                BigDecimal.valueOf(maxBalancePercentage));
+
+        log.info(
+                "Balance check -> amount : {} maxAllowedBalance : {} IsSuspicious : {} ",
+                amount,maxAllowedBalance,amount.compareTo(maxAllowedBalance)> 0
+                );
+
+        return amount.compareTo(maxAllowedBalance)>0;
 
     }
 }

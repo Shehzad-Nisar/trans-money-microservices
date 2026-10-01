@@ -4,3 +4,4 @@ spring:
 fraud:
   max-transaction-per-minute: 5
   suspicious-amount-multiplier: 5
+  max-balance-percentage: .90
