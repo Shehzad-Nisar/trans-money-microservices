@@ -114,14 +114,25 @@ public class FraudDetectionService {
 
     // 2 : isAmountSuspicious().
     private boolean isAmountSuspicious(String senderAccountNumber, BigDecimal amount) {
+
+        //Make redis to store the avg_amount of transactions.
         String avg_key = "fraud:avg_amount"+senderAccountNumber;
+
+        //whenever a transaction happened value from redis will store to this "avg_Str_amount".
         String avg_Str_amount = redisTemplate.opsForValue().get(avg_key);
 
+        //It will run when it is the first transaction.
         if(avg_Str_amount == null){
             redisTemplate.opsForValue().set(avg_key,amount.toString());
             avg_Str_amount = amount.toString();
         }
 
+        /*
+        * 1- Setting the Average amount in Big Decimal for setting the threshold value
+        * 2- threshold will be = averageAmount X suspiciousAmountMultiplier
+        *    -> 1000 X 5 = 5000 will be threshold in this case.
+        *
+        * */
         BigDecimal avgAmount = new BigDecimal(avg_Str_amount);
         BigDecimal threshold = avgAmount.multiply(BigDecimal.valueOf(suspiciousAmountMultiplier));
 
@@ -133,9 +144,8 @@ public class FraudDetectionService {
 
         log.info("Amount check -amount : {} threshold : {} suspicious : {} ",amount,threshold,amount.compareTo(threshold)> 0);
 
+        //returning the result in boolean if suspicious it will return 'TRUE' else 'FALSE'.:
         return amount.compareTo(threshold)>0;
-
-
 
 
     }
