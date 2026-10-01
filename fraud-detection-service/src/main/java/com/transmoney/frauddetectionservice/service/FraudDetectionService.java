@@ -11,6 +11,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -123,6 +124,18 @@ public class FraudDetectionService {
 
         BigDecimal avgAmount = new BigDecimal(avg_Str_amount);
         BigDecimal threshold = avgAmount.multiply(BigDecimal.valueOf(suspiciousAmountMultiplier));
+
+        // update the running average.
+        BigDecimal new_avg = avgAmount.add(amount).divide(BigDecimal.valueOf(2),2, RoundingMode.HALF_UP);
+
+        //updating average in redis.
+        redisTemplate.opsForValue().set(avg_key,new_avg.toString());
+
+        log.info("Amount check -amount : {} threshold : {} suspicious : {} ",amount,threshold,amount.compareTo(threshold)> 0);
+
+        return amount.compareTo(threshold)>0;
+
+
 
 
     }
