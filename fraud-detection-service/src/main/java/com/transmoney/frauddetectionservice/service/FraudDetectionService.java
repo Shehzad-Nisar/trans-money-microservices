@@ -57,7 +57,7 @@ public class FraudDetectionService {
 
             Map<String,Object> verificationEvent = new HashMap<>();
             verificationEvent.putIfAbsent("transactionId",transactionId);
-            verificationEvent.put("accountNumber",senderAccountNumber);
+            verificationEvent.put("senderAccountNumber",senderAccountNumber);
             verificationEvent.put("amount",amount);
             verificationEvent.put("reason",fraudCheckResult.getReason());
 
