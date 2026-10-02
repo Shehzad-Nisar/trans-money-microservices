@@ -7,10 +7,13 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -21,6 +24,9 @@ public class TransactionEventConsumer  {
     private final static long OTP_MAX_MINUTES = 5;
 
     private final RedisTemplate<String,String> redisTemplate;
+    private final KafkaTemplate<String,Object> kafkaTemplate;
+
+    private static final String OTP_REQUIRED_TOPIC = "otp.required";
 
 
     @KafkaListener(
@@ -43,6 +49,7 @@ public class TransactionEventConsumer  {
             String transactionId = (String) verificationEvent.get("transactionId");
             String senderAccountNumber = (String) verificationEvent.get("senderAccountNumber");
             String reason = (String) verificationEvent.get("reason");
+            BigDecimal amount = new BigDecimal(verificationEvent.get("amount").toString());
 
 
             log.info(
@@ -62,27 +69,40 @@ public class TransactionEventConsumer  {
                 return;
             }
 
+            /*
+             * -Change the status of transaction to Pending from processing
+             * -Then save the changes to DB as well.
+             * */
+            transaction.setStatus(TransactionStatus.PENDING_VERIFICATION);
+            transactionRepository.save(transaction);
+
 
             //Generate 6 digits OTP.
             String otpNumber = String.format("%06d",(int) (Math.random()*900000 + 100000));
 
            //Store opt in Redis -Which will be expired in 5 minutes.
-            String otp_key = "otp:generated"+transactionId;
+            String otp_key = "verification-otp:"+transactionId;
 
             redisTemplate.opsForValue().set(otp_key,otpNumber);
             redisTemplate.expire(otp_key, Duration.ofMinutes(OTP_MAX_MINUTES));
 
-            /*
-            * -Change the status of transaction to Pending from processing
-            * -Then save the changes to DB as well.
-             * */
-            transaction.setStatus(TransactionStatus.PENDING_VERIFICATION);
-            transactionRepository.save(transaction);
+
 
             log.info("OTP generated for transaction : {} Will be expire in {} minutes.",
                     transactionId,OTP_MAX_MINUTES);
 
-            //Verify User
+            //Verify User from User so we need to send an event in Kafka :
+           Map<String , Object> notificationEvent = new HashMap<>();
+           notificationEvent.put("transactionId",transactionId);
+           notificationEvent.put("senderAccountNumber",senderAccountNumber);
+           notificationEvent.put("amount",amount);
+           notificationEvent.put("reason",reason);
+           notificationEvent.put("otpNumber",otpNumber);
+
+           kafkaTemplate.send(OTP_REQUIRED_TOPIC,transactionId,notificationEvent);
+
+
+
 
 
 
