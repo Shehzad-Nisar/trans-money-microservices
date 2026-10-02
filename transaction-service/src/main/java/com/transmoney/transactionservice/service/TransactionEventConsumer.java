@@ -81,10 +81,10 @@ public class TransactionEventConsumer  {
             String otpNumber = String.format("%06d",(int) (Math.random()*900000 + 100000));
 
            //Store opt in Redis -Which will be expired in 5 minutes.
-            String otp_key = "verification-otp:"+transactionId;
+            String otpKey = "verification-otp:"+transactionId;
 
-            redisTemplate.opsForValue().set(otp_key,otpNumber);
-            redisTemplate.expire(otp_key, Duration.ofMinutes(OTP_MAX_MINUTES));
+            redisTemplate.opsForValue().set(otpKey,otpNumber);
+            redisTemplate.expire(otpKey, Duration.ofMinutes(OTP_MAX_MINUTES));
 
 
 
@@ -92,35 +92,20 @@ public class TransactionEventConsumer  {
                     transactionId,OTP_MAX_MINUTES);
 
             //Verify User from User so we need to send an event in Kafka :
-           Map<String , Object> notificationEvent = new HashMap<>();
-           notificationEvent.put("transactionId",transactionId);
-           notificationEvent.put("senderAccountNumber",senderAccountNumber);
-           notificationEvent.put("amount",amount);
-           notificationEvent.put("reason",reason);
-           notificationEvent.put("otpNumber",otpNumber);
+           Map<String , Object> otpEvent = new HashMap<>();
+            otpEvent.put("transactionId",transactionId);
+            otpEvent.put("senderAccountNumber",senderAccountNumber);
+            otpEvent.put("amount",amount);
+            otpEvent.put("reason",reason);
+            otpEvent.put("otpNumber",otpNumber);
 
-           kafkaTemplate.send(OTP_REQUIRED_TOPIC,transactionId,notificationEvent);
-
-
-
-
-
-
-
-
-
-
+           //Sending event to kafka so that notification can consume it.
+           kafkaTemplate.send(OTP_REQUIRED_TOPIC,transactionId,otpEvent);
 
 
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.error("Error handling verification required : {} ",e.getMessage());
         }
-
-
-
-
-
-
 
     }
 
