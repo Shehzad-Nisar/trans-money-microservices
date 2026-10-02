@@ -16,7 +16,10 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Data
@@ -155,5 +158,35 @@ public class TransactionService {
         completeTransaction(transaction);
 
         return mapToResponse(transaction);
+    }
+
+    private void compensateTransaction(Transaction transaction, String reason) {
+        log.warn(
+                "SAGA compensation -refunding amount of {} in account : {}",
+                transaction.getAmount(),transaction.getSenderAccountNumber());
+
+        //Money credit back to sender account
+        accountServiceClient.creditBalance(transaction.getSenderAccountNumber(),transaction.getAmount());
+        transaction.setStatus(TransactionStatus.FLAGGED);
+        transaction.setFailureReason(reason + "SAGA -compensation completed, amount refunded at : " + LocalDateTime.now());
+
+        //Save changes to repo as well.
+        transactionRepository.save(transaction);
+
+
+        //Publish refund event -Notificaiton will alert user.
+
+        Map<String,Object> refundEvent = new HashMap<>();
+        refundEvent.put("transactionId",transaction.getId());
+        refundEvent.put("senderAccountNumber",transaction.getSenderAccountNumber());
+        refundEvent.put("amount",transaction.getAmount());
+        refundEvent.put("reason",reason);
+
+        kafkaTemplate.send(TRANSACTION_REFUNDED_TOPIC,transaction.getId(),refundEvent);
+
+        log.info("Compensation completed : {} refunded to : {}",transaction.getAmount(),transaction.getSenderAccountNumber());
+
+
+
     }
 }

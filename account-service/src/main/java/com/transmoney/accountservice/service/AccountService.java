@@ -149,7 +149,7 @@ public class AccountService {
 
     /*
     * 1- Credit balance.
-    * 2- Called by transaction service via kafka.
+    * 2- Called by transaction service via Kafka.
     * */
     public void creditBalance(String accountNumber, BigDecimal amount) {
         log.info("Crediting balance of {} in Account : {}", amount, accountNumber);
