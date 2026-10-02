@@ -36,6 +36,8 @@ public class TransactionService {
     private final String TRANSACTION_INITIATED_TOPIC = "transaction.initiated";
     private final String TRANSACTION_COMPLETED_TOPIC = "transaction.completed";
     private final String TRANSACTION_REFUNDED_TOPIC = "transaction.refunded";
+    private final String FRAUD_DETECTED_TOPIC = "fraud.detected";
+
 
 
 
@@ -129,13 +131,20 @@ public class TransactionService {
         Transaction transaction = transactionRepository.findById(transactionId)
                 .orElseThrow(()-> new RuntimeException("transaction not found :  " + transactionId));
 
+        // NEW: OTP should only be accepted when the transaction
+        // is actually waiting for OTP verification.
+        if (transaction.getStatus() != TransactionStatus.PENDING_VERIFICATION) {
+            throw new RuntimeException(
+                    "Transaction is not waiting for OTP verification."
+            );
+        }
+
         //Fetch opt value from redis :
         String otpkey = "verification-otp:"+transactionId;
         String redisOtp = redisTemplate.opsForValue().get(otpkey);
 
         if(redisOtp==null){
             log.warn("OTP expired for transaction : {}",transactionId);
-            redisTemplate.delete(otpkey);
             compensateTransaction(transaction,"OTP was expired -transaction cancelled and amount refunded.");
 
             return mapToResponse(transaction);
@@ -159,6 +168,7 @@ public class TransactionService {
 
         return mapToResponse(transaction);
     }
+
 
     private void compensateTransaction(Transaction transaction, String reason) {
         log.warn(
@@ -189,4 +199,31 @@ public class TransactionService {
 
 
     }
+
+    private void blockAccountAndCompensate(Transaction transaction, String reason) {
+
+
+        //1- Publish fraud.detected event -account service will block account.
+
+        Map<String,Object> fraudDetected = new HashMap<>();
+        fraudDetected.put("transactionId",transaction.getId());
+        fraudDetected.put("senderAccountNumber",transaction.getSenderAccountNumber());
+        fraudDetected.put("amount",transaction.getAmount());
+        fraudDetected.put("reason",reason);
+
+        kafkaTemplate.send(FRAUD_DETECTED_TOPIC,transaction.getId(),fraudDetected);
+
+        //It will refund the sender and save it .
+        compensateTransaction(transaction,reason);
+
+
+
+    }
+
+
+
+    private void completeTransaction(Transaction transaction) {
+    }
+
+
 }

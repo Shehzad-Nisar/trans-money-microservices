@@ -50,10 +50,10 @@ public class AccountEventConsumer {
     public void consumeFraudDetected(
             @Payload Map<String, Object> payload){
     try {
-        String receiverAccount = (String) payload.get("receiverAccountNumber");
-        log.info("Fraud detected now blocking account : {}",receiverAccount);
+        String accountNumber = (String) payload.get("accountNumber");
+        log.info("Fraud detected now blocking account : {}",accountNumber);
 
-        accountService.blockAccount(receiverAccount);
+        accountService.blockAccount(accountNumber);
     }catch (Exception e){
         log.error("Error blocking account : {}", e.getMessage());
 
