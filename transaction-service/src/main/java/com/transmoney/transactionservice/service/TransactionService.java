@@ -7,6 +7,7 @@ import com.transmoney.transactionservice.dto.TransferReq;
 import com.transmoney.transactionservice.entity.Transaction;
 import com.transmoney.transactionservice.entity.TransactionStatus;
 import com.transmoney.transactionservice.entity.TransactionType;
+import com.transmoney.transactionservice.event.TransactionCompletedEvent;
 import com.transmoney.transactionservice.event.TransactionInitiatedEvent;
 import com.transmoney.transactionservice.repository.TransactionRepository;
 import lombok.AllArgsConstructor;
@@ -223,6 +224,27 @@ public class TransactionService {
 
 
     private void completeTransaction(Transaction transaction) {
+        /*
+        * 1- set Transaction.Status as "COMPLETED"
+        * 2- set Transaction.completed time
+        * 3- save transaction to db.
+        *
+        * */
+
+        transaction.setStatus(TransactionStatus.COMPLETED);
+        transaction.setCompletedAt(LocalDateTime.now());
+        transactionRepository.save(transaction);
+
+        TransactionCompletedEvent transactionCompletedEvent = new TransactionCompletedEvent(
+                transaction.getId(),
+                transaction.getSenderAccountNumber(),
+                transaction.getReceiverAccountNumber(),
+                transaction.getAmount(),
+                transaction.getDescription());
+
+        kafkaTemplate.send(TRANSACTION_COMPLETED_TOPIC,transaction.getId(),transactionCompletedEvent);
+
+        log.info("Transaction COMPLETED - Transaction {} completed.",transaction.getId());
     }
 
 
