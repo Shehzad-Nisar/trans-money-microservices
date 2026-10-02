@@ -21,6 +21,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class TransactionEventConsumer  {
     private final TransactionRepository transactionRepository;
+    private final TransactionService transactionService;
     private final static long OTP_MAX_MINUTES = 5;
 
     private final RedisTemplate<String,String> redisTemplate;
@@ -109,6 +110,24 @@ public class TransactionEventConsumer  {
 
     }
 
+    @KafkaListener(topics = "fraud.check.clean")
+    public void fraudCheckCleanConsumer(
+            @Payload Map<String, Object> payload) {
+
+        try {
+            String transactionId =
+                    (String) payload.get("transactionId");
 
 
-}
+            transactionService.processCleanResult(transactionId);
+        } catch (Exception e) {
+            log.error(
+                    "Error processing fraud.check.clean event",
+                    e
+            );
+            throw e;
+        }
+
+
+
+}}

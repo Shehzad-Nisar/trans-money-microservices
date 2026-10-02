@@ -32,9 +32,12 @@ public class AccountEventConsumer {
             accountService.creditBalance(receiverAccount,amount);
 
 
-        } catch (Exception e){
-            log.error("Error crediting account : {}", e.getMessage());
-
+        }  catch (Exception e) {
+            log.error(
+                    "Error processing transaction.completed event",
+                    e
+            );
+            throw e;
         }
 
     }
@@ -50,7 +53,8 @@ public class AccountEventConsumer {
     public void consumeFraudDetected(
             @Payload Map<String, Object> payload){
     try {
-        String accountNumber = (String) payload.get("accountNumber");
+        String accountNumber =
+                (String) payload.get("senderAccountNumber");
         log.info("Fraud detected now blocking account : {}",accountNumber);
 
         accountService.blockAccount(accountNumber);

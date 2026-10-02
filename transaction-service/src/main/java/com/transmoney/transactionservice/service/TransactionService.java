@@ -14,7 +14,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -248,4 +250,33 @@ public class TransactionService {
     }
 
 
+    public void processCleanResult(String transactionId) {
+
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(()-> new RuntimeException("Transaction not found " + transactionId));
+
+        /*
+         * -if transaction has other status except "PROCESSING".
+         * -Then shouldn't proceed further and return or exit.
+         * */
+        if(transaction.getStatus()!= TransactionStatus.PROCESSING){
+            log.info("Transaction -> {} not PROCESSING - Skipping",transactionId);
+            return;
+        }
+
+        completeTransaction(transaction);
+
+    }
 }
+}
+
+
+
+
+
+
+
+
+
+
+
