@@ -1,3 +1,26 @@
 spring:
   application:
-    name: api-gateway
+    name: transmoney-api-gateway
+
+  cloud:
+    gateway:
+      routes:
+
+        - id: account-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/v1/accounts/**
+
+        - id: transaction-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/v1/transactions/**
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
