@@ -110,7 +110,8 @@ public class TransactionEventConsumer  {
 
     }
 
-    @KafkaListener(topics = "fraud.check.clean")
+    @KafkaListener(topics = "fraud.check.clean",
+                   groupId = "transaction-service")
     public void fraudCheckCleanConsumer(
             @Payload Map<String, Object> payload) {
 

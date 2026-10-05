@@ -15,7 +15,6 @@ public interface AccountRepository extends JpaRepository<Account,String> {
 
     Optional<Account> findByAccountNumber(String accountNumber);
 
-    Account blockAccount(String accountNumber);
 }
 
 

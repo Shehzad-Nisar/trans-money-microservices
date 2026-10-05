@@ -21,7 +21,8 @@ public class AccountEventConsumer {
     * - Credit receiver's Account.
     * @param payload.
     * */
-    @KafkaListener(topics = "transaction.completed")
+    @KafkaListener(topics = "transaction.completed"
+                    , groupId = "account-service-group")
     public void consumeTransactionCompleted(
             @Payload Map<String,Object> payload){
         try {
@@ -49,7 +50,8 @@ public class AccountEventConsumer {
     *
     * */
 
-    @KafkaListener(topics = "fraud.detected")
+    @KafkaListener(topics = "fraud.detected",
+                   groupId = "account-service-group")
     public void consumeFraudDetected(
             @Payload Map<String, Object> payload){
     try {
