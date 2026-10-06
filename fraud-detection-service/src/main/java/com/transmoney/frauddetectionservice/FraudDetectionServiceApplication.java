@@ -7,6 +7,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 
 @SpringBootApplication
 @EnableFeignClients
+
 public class FraudDetectionServiceApplication {
 
 	public static void main(String[] args) {

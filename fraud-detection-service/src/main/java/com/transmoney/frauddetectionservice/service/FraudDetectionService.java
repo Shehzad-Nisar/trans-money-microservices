@@ -4,6 +4,7 @@ package com.transmoney.frauddetectionservice.service;
 import com.transmoney.frauddetectionservice.client.AccountServiceClient;
 import com.transmoney.frauddetectionservice.model.FraudCheckResult;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -19,21 +20,22 @@ import java.util.Map;
 
 @Service
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
+
 public class FraudDetectionService {
     private final AccountServiceClient accountServiceClient;
     private final KafkaTemplate<String,Object> kafkaTemplate;
     private final RedisTemplate<String,String> redisTemplate;
 
+    // Configuration → NOT final
     @Value("${fraud.max-transaction-per-minute}")
-    private final int maxTransactionsPerMinute;
+    private int maxTransactionsPerMinute;
 
     @Value("${fraud.suspicious-amount-multiplier}")
-    private final double suspiciousAmountMultiplier;
+    private double suspiciousAmountMultiplier;
 
     @Value("${fraud.max-balance-percentage}")
-    private final double maxBalancePercentage;
-
+    private double maxBalancePercentage;
 
     private static final String VERIFICATION_REQUIRED_TOPIC = "verification.required";
     private static final String FRAUD_CHECK_CLEAN_RESULT_TOPIC = "fraud.check.clean";

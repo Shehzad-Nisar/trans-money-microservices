@@ -14,7 +14,7 @@ spring:
       group-id: fraud-detection-service
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JacksonJsonDeserializer
       properties:
         spring:
           json:
@@ -23,18 +23,23 @@ spring:
             use:
               type:
                 headers: false
-              value:
-                default:
-                  type: java.util.HashMap
+            value:
+              default:
+                type: java.util.HashMap
 
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
+      properties:
+        spring:
+          json:
+            add:
+              type:
+                headers: false
 
 server:
   port: 8084
 
-#Account service URL for feign client
 account:
   service:
     url: http://localhost:8081
@@ -42,7 +47,7 @@ account:
 fraud:
   max-transaction-per-minute: 5
   suspicious-amount-multiplier: 3
-  max-balance-percentage: 80
+  max-balance-percentage: 0.9
 
 management:
   endpoints:
