@@ -31,17 +31,14 @@ public class JwtAuthenticationFilter implements WebFilter {
                         .getHeaders()
                         .getFirst(HttpHeaders.AUTHORIZATION);
 
-        // No token
         if (authHeader == null ||
                 !authHeader.startsWith("Bearer ")) {
 
             return chain.filter(exchange);
         }
 
-        // Remove "Bearer "
         String token = authHeader.substring(7);
 
-        // Invalid token
         if (!jwtService.isTokenValid(token)) {
 
             exchange.getResponse()
@@ -50,10 +47,8 @@ public class JwtAuthenticationFilter implements WebFilter {
             return exchange.getResponse().setComplete();
         }
 
-        // Extract user identity from JWT
         String email = jwtService.extractEmail(token);
 
-        // Create authenticated user
         Authentication authentication =
                 new UsernamePasswordAuthenticationToken(
                         email,
@@ -61,8 +56,16 @@ public class JwtAuthenticationFilter implements WebFilter {
                         Collections.emptyList()
                 );
 
-        // Continue request with authentication
-        return chain.filter(exchange)
+        ServerWebExchange modifiedExchange =
+                exchange.mutate()
+                        .request(request -> request
+                                .headers(headers -> {
+                                    headers.remove("X-User-Email");
+                                    headers.add("X-User-Email", email);
+                                }))
+                        .build();
+
+        return chain.filter(modifiedExchange)
                 .contextWrite(
                         ReactiveSecurityContextHolder
                                 .withAuthentication(authentication)
