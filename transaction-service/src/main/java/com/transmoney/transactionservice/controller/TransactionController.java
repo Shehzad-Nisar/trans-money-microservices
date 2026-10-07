@@ -24,10 +24,11 @@ public class TransactionController {
 
     @PostMapping("/transfer")
     public ResponseEntity<TransactionResponse> transfer(
-            @Valid @RequestBody TransferReq req) {
+            @Valid @RequestBody TransferReq req,
+            @RequestHeader("X-User-Email") String userEmail) {
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(transactionService.transfer(req));
+                .body(transactionService.transfer(req, userEmail));
     }
 
     @GetMapping("/{transactionId}")

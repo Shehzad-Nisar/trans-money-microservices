@@ -2,6 +2,7 @@ package com.transmoney.transactionservice.service;
 
 
 import com.transmoney.transactionservice.client.AccountServiceClient;
+import com.transmoney.transactionservice.dto.AccountResponse;
 import com.transmoney.transactionservice.dto.TransactionResponse;
 import com.transmoney.transactionservice.dto.TransferReq;
 import com.transmoney.transactionservice.entity.Transaction;
@@ -54,8 +55,14 @@ public class TransactionService {
     * @return
     * */
 
-    public TransactionResponse transfer(TransferReq req) {
+    public TransactionResponse transfer(TransferReq req, String userEmail) {
         log.info("SAGA STARTED: Transfer : {} -> {} amount : {}",req.getSenderAccountNumber(), req.getReceiverAccountNumber(),req.getAmount());
+
+        AccountResponse senderAccount =
+                accountServiceClient.getAccount(
+                        req.getSenderAccountNumber(),
+                        userEmail
+                );
 
         //SAGA STEP 1: deduct form sender account.
         accountServiceClient.deductBalance(
