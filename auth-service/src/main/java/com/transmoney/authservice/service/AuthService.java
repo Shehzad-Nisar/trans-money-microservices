@@ -16,6 +16,7 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     public void register(RegisterRequest request) {
 
@@ -40,8 +41,10 @@ public class AuthService {
 
     public LoginResponse login(LoginRequest request) {
 
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+        User user = userRepository
+                .findByEmail(request.getEmail())
+                .orElseThrow(() ->
+                        new RuntimeException("Invalid email or password"));
 
         if (!passwordEncoder.matches(
                 request.getPassword(),
@@ -50,8 +53,8 @@ public class AuthService {
             throw new RuntimeException("Invalid email or password");
         }
 
-        // JWT generation will be added here
+        String token = jwtService.generateToken(user.getEmail());
 
-        return null;
+        return new LoginResponse( token);
     }
 }
