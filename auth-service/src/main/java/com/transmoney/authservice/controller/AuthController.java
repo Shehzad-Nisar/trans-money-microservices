@@ -1,5 +1,7 @@
 package com.transmoney.authservice.controller;
 
+import com.transmoney.authservice.dto.LoginRequest;
+import com.transmoney.authservice.dto.LoginResponse;
 import com.transmoney.authservice.dto.RegisterRequest;
 import com.transmoney.authservice.service.AuthService;
 import jakarta.validation.Valid;
@@ -21,5 +23,15 @@ public class AuthController {
         authService.register(request);
 
         return ResponseEntity.ok("User registered successfully");
+    }
+
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(
+            @Valid @RequestBody LoginRequest request) {
+
+        LoginResponse response = authService.login(request);
+
+        return ResponseEntity.ok(response);
     }
 }
