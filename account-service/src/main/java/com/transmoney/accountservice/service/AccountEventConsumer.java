@@ -61,7 +61,12 @@ public class AccountEventConsumer {
 
         accountService.blockAccount(accountNumber);
     }catch (Exception e){
-        log.error("Error blocking account : {}", e.getMessage());
+        log.error(
+                "Error processing fraud.detected event",
+                e
+        );
+
+        throw e;
 
     }
     }

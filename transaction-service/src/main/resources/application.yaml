@@ -1,6 +1,7 @@
 spring:
   application:
     name: transaction-service
+
   data:
     redis:
       host: localhost
@@ -36,9 +37,9 @@ spring:
             use:
               type:
                 headers: false
-              value:
-                default:
-                  type: java.util.HashMap
+            value:
+              default:
+                type: java.util.HashMap
 
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer

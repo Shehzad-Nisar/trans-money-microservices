@@ -36,9 +36,19 @@ public class AccountController {
             @PathVariable String accountNumber,
             @RequestHeader("X-User-Email") String userEmail) {
 
+        log.info(
+                "ACCOUNT OWNERSHIP CHECK -> account: {}, userEmail: {}",
+                accountNumber,
+                userEmail
+        );
+
         AccountResponse account =
                 accountService.getAccount(accountNumber);
 
+        log.info(
+                "ACCOUNT OWNER FROM DB -> {}",
+                account.getEmail()
+        );
         if (!account.getEmail().equalsIgnoreCase(userEmail)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .build();

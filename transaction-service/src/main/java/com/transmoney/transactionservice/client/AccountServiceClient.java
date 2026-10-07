@@ -16,12 +16,12 @@ public interface AccountServiceClient {
             @PathVariable String accountNumber,
             @RequestHeader("X-User-Email") String userEmail);
 
-    @RequestMapping("/api/v1/accounts/{accountNumber}/deduct")
+    @PutMapping("/api/v1/accounts/{accountNumber}/deduct")
     String deductBalance(
             @PathVariable String accountNumber,
             @RequestParam BigDecimal amount);
 
-    @RequestMapping("/api/v1/accounts/{accountNumber}/credit")
+    @PutMapping("/api/v1/accounts/{accountNumber}/credit")
     String creditBalance(
             @PathVariable String accountNumber,
             @RequestParam BigDecimal amount);
