@@ -32,10 +32,18 @@ public class AccountController {
 
     @GetMapping("/{accountNumber}")
     public ResponseEntity<AccountResponse> getAccount(
-            @PathVariable String accountNumber){
+            @PathVariable String accountNumber,
+            @RequestHeader("X-User-Email") String userEmail) {
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(accountService.getAccount(accountNumber));
+        AccountResponse account =
+                accountService.getAccount(accountNumber);
+
+        if (!account.getEmail().equalsIgnoreCase(userEmail)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .build();
+        }
+
+        return ResponseEntity.ok(account);
     }
 
     @GetMapping("/{accountNumber}/balance")
