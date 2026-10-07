@@ -25,16 +25,16 @@ public class AccountService {
     * Create a new Account.
     *
     * */
-    public AccountResponse createAccount(CreateAccountRequest request) {
-        log.info("Creating an account for : {}" , request.getEmail());
+    public AccountResponse createAccount(CreateAccountRequest request, String userEmail) {
+        log.info("Creating an account for : {}" , userEmail);
 
-        if(accountRepository.existsByEmail(request.getEmail())){
-            throw new RuntimeException("Account already exists against this email: " + request.getEmail());
+        if(accountRepository.existsByEmail(userEmail)){
+            throw new RuntimeException("Account already exists against this email: " + userEmail);
         }
 
         Account account = new Account();
         account.setAccountHolderName(request.getAccountHolderName());
-        account.setEmail(request.getEmail());
+        account.setEmail(userEmail);
         account.setPhone(request.getPhone());
         account.setAccountType(request.getAccountType());
         account.setAccountStatus(AccountStatus.ACTIVE);

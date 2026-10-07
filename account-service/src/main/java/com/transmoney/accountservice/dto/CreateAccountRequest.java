@@ -22,10 +22,6 @@ public class CreateAccountRequest {
     @NotBlank(message = "Account holder name is required.")
     private String accountHolderName;
 
-    @NotBlank(message = "Account holder's email is required.")
-    @Email(message = "Invalid email format.")
-    private String email;
-
     @NotBlank(message = "Account holder's phone number is required.")
     private String phone;
 

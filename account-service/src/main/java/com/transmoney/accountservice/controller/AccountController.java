@@ -24,10 +24,11 @@ public class AccountController {
 
     @PostMapping
     public ResponseEntity<AccountResponse> createAccount(
-            @Valid @RequestBody CreateAccountRequest request)
+            @Valid @RequestBody CreateAccountRequest request,
+            @RequestHeader("X-User-Email") String userEmail)
     {
-        return  ResponseEntity.status(HttpStatus.CREATED)
-                .body(accountService.createAccount(request));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(accountService.createAccount(request, userEmail));
     }
 
     @GetMapping("/{accountNumber}")
