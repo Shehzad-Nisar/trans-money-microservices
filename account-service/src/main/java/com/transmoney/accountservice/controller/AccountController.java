@@ -46,9 +46,23 @@ public class AccountController {
                 accountService.getAccount(accountNumber);
 
         log.info(
-                "ACCOUNT OWNER FROM DB -> {}",
-                account.getEmail()
+                "DB EMAIL RAW -> [{}], length={}",
+                account.getEmail(),
+                account.getEmail().length()
         );
+
+
+        log.info(
+                "HEADER EMAIL RAW -> [{}], length={}",
+                userEmail,
+                userEmail.length()
+        );
+
+        log.info(
+                "EMAIL MATCH RESULT -> {}",
+                account.getEmail().equalsIgnoreCase(userEmail)
+        );
+
         if (!account.getEmail().equalsIgnoreCase(userEmail)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .build();
