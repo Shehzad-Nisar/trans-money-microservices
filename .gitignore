@@ -1,0 +1,44 @@
+# ============================================================
+# ROOT .gitignore — TransMoney Microservices Project
+# ============================================================
+
+# ── OS ────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── IDE ───────────────────────────────────────────────────
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/*
+!.vscode/extensions.json
+*.suo *.ntvs* *.njsproj *.sln *.sw?
+
+# ── Java / Maven ──────────────────────────────────────────
+target/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# ── Sensitive backend config — NEVER commit these ─────────
+# Each service has its own application-secret.yml (see .env.example)
+backend/*/src/main/resources/application-secret.yml
+backend/*/src/main/resources/application-secret.yaml
+
+# ── Frontend ──────────────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/*.local
+
+# ── Environment variables ─────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Logs ──────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

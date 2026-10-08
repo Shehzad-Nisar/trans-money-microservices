@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: auth-service
+
+  datasource:
+    url: ${AUTH_DB_URL:jdbc:mysql://localhost:3306/banking}
+    username: ${AUTH_DB_USERNAME:banking}
+    password: ${AUTH_DB_PASSWORD:banking}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 86400000
+
+server:
+  port: 8086
